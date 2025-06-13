@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore.Query.Internal;
 using SnakeLadder.Database.Entities;
 using SnakeLadderApi.Models;
 using SnakeLadderApi.Models.PlayerPosition;
+using System.Diagnostics.Eventing.Reader;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SnakeLadderApi.Services.PlayerPositionServices;
 
@@ -27,7 +29,7 @@ public class CreatePlayerPositionService
         }
     }
 
-    public CreatePlayerPositionResponseModel CreatePlayerPosition(UpdatePlayerPositionRequestModel requestModel)
+    public BasedResponseModel CreatePlayerPosition(UpdatePlayerPositionRequestModel requestModel)
     {
         /*
          - Select previous RowNo by PlayerId
@@ -37,10 +39,23 @@ public class CreatePlayerPositionService
          - Insert record
          */
 
-        CreatePlayerPositionResponseModel model;
+        var isIdExist = _context.TblPlayers.FirstOrDefault(x => x.PlayerId == requestModel.PlayerId);
+
+        if (isIdExist is null)
+        {
+            return new BasedResponseModel
+            {
+                IsSuccess = false,
+                Message = "Player Id does not exist."
+            };
+        }
+        //CreatePlayerPositionResponseModel model;
         int randomNo = DiceRoller.RollDie();
+        //int randomNo = 8;
         var currentPositionNo = 0;
         int updatedPositionNo = currentPositionNo + randomNo;
+
+        var message = string.Empty;
 
         var item = _context.TblPlayerPositions.Where(x => x.PlayerId == requestModel.PlayerId)
                     .OrderByDescending(x => x.CreatedDate)
@@ -48,20 +63,36 @@ public class CreatePlayerPositionService
                     .SingleOrDefault()!;
         if (item is not null)
         {
+            if(item.CurrentPosition > 100)
+            {
+                _context.TblPlayerPositions.Where(x => x.PlayerId == requestModel.PlayerId).ExecuteUpdate(x => x.SetProperty(y => y.CurrentPosition, 0));
+
+                _context.SaveChanges();
+                return new BasedResponseModel
+                {
+                    IsSuccess = true,
+                    Message = "You have already won the game!"
+                };
+            }
              currentPositionNo = item.CurrentPosition;
         }
         updatedPositionNo = currentPositionNo + randomNo;
 
         var itemSnake = _context.TblSnakes.FirstOrDefault(x => x.FromPosition == updatedPositionNo)!;
+        
+        var itemLadder = _context.TblLadders.FirstOrDefault(x => x.FromPosition == updatedPositionNo)!;
+
         if (itemSnake is not null)
         {
             updatedPositionNo = itemSnake.ToPosition;
+
+            message = $"You got bitten by a snake! Moved from {currentPositionNo} to {updatedPositionNo}.";
         }
 
-        var itemLadder = _context.TblLadders.FirstOrDefault(x => x.FromPosition == updatedPositionNo)!;
-        if (itemLadder is not null)
+        else if (itemLadder is not null)
         {
             updatedPositionNo = itemLadder.ToPosition;
+            message = $"You climbed a ladder! Moved from {currentPositionNo} to {updatedPositionNo}.";
         }
 
         _context.TblPlayerPositions.Add(new TblPlayerPosition
@@ -70,16 +101,33 @@ public class CreatePlayerPositionService
             CurrentPosition = updatedPositionNo,
             CreatedDate = DateTime.UtcNow,
         });
-        _context.SaveChanges();
 
-         return model = new CreatePlayerPositionResponseModel
+
+        //_context.TblPlayerPositions.Update(new TblPlayerPosition
+        //{
+        //    PlayerPositionId = item.PlayerPositionId,
+        //    PlayerId = requestModel.PlayerId,
+        //    CurrentPosition = updatedPositionNo,
+        //    CreatedDate = DateTime.UtcNow,
+        //});
+        var affectedRows = _context.SaveChanges();
+
+        var result = new CreatePlayerPositionResponseModel
         {
             PlayerId = requestModel.PlayerId,
+            PreviousPosition = currentPositionNo,
             CurrentPosition = updatedPositionNo,
+            DiceNumber = randomNo,
+            Message = message,
             CreatedDate = DateTime.UtcNow,
         };
-
-
+        var model = new BasedResponseModel
+        {
+            IsSuccess = affectedRows > 0,
+            Message = affectedRows > 0 ? "Success." : "Fail.",
+            Data = result
+        };
+        return model;
     }
 }
 

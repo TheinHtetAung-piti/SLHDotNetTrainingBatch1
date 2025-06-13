@@ -1,0 +1,61 @@
+﻿@{
+}
+
+<h1>Wallet Users <span id="txtUserCount"></span></h1>
+
+<a class="btn btn-outline-success" href="/Wallet/Create">Create</a>
+
+<a class="btn btn-outline-success" href="/transaction/history">Transaction History</a>
+
+<a class="btn btn-outline-success" href="/wallet/history">Wallet History</a>
+
+<a class="btn btn-outline-primary" href="/wallet/deposit">Deposit</a>
+
+<a class="btn btn-outline-primary" href="/wallet/withdraw">Withdraw</a>
+
+<a class="btn btn-outline-primary" href="/wallet/check-balance">Check Balance</a>
+
+<a class="btn btn-outline-primary" href="/wallet/transfer">Transfer</a>
+
+
+<table class="table table-responsive">
+    <thead>
+        <tr>
+            <th>Actions</th>
+            <th>No.</th>
+            <th>User Name</th>
+            <th>Mobile No</th>
+            <th>Balance</th>
+        </tr>
+    </thead>
+    <tbody id="tbDataTable">
+    </tbody>
+</table>
+
+@* <script>
+    alert("This is Wallet Index Page");
+</script> *@
+
+@section scripts {
+    <script>
+        $('#txtUserCount').html('100');
+        alert("This is Wallet Index Page - Scripts Section");
+    </script>
+}
+
+@section css {
+    @* <style>
+        body {
+            background-color: red;
+        }
+    </style> *@
+}
+
+@section header {
+   @*  <button type="button" class="btn btn-primary">
+        Notifications <span class="badge text-bg-secondary">4</span>
+    </button> *@
+    @* <partial name="ButtonBadge" data="100" /> *@
+
+    @await Html.PartialAsync("ButtonBadge", 100)
+}
