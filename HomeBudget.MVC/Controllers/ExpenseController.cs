@@ -1,5 +1,7 @@
-﻿using HomeBudget.BusinessLogic.Services.ExpenseService.CreateExpense;
+﻿using System.Threading.Tasks;
+using HomeBudget.BusinessLogic.Services.ExpenseService.CreateExpense;
 using HomeBudget.BusinessLogic.Services.ExpenseService.CreateExpenseService;
+using HomeBudget.BusinessLogic.Services.ExpenseService.DetailExpnseService;
 using HomeBudget.BusinessLogic.Services.ExpenseService.GetExpenseNameService;
 using HomeBudget.Database.Models;
 using HomeBudget.MVC.Models;
@@ -12,11 +14,13 @@ namespace HomeBudget.MVC.Controllers
 
         private readonly GetExpenseNameService _getExpenseName;
         private readonly CreateExpenseService _createExpenseService;
+        private readonly DetailExpenseService _detailExpenseService;
 
-        public ExpenseController(GetExpenseNameService getExpenseName, CreateExpenseService createExpenseService)
+        public ExpenseController(GetExpenseNameService getExpenseName, CreateExpenseService createExpenseService, DetailExpenseService detailExpenseService = null)
         {
             _getExpenseName = getExpenseName;
             _createExpenseService = createExpenseService;
+            _detailExpenseService = detailExpenseService;
         }
 
         public IActionResult Index()
@@ -58,6 +62,12 @@ namespace HomeBudget.MVC.Controllers
             return RedirectToAction("Create");
         }
 
+        [ActionName("Detail")]
+        public async Task<IActionResult> DetailExpense(int id)
+        {
+            var result = await _detailExpenseService.GetDetailExpenseAsync(id);
+            return View("ViewDetail", result);
+        }
 
     }
 }

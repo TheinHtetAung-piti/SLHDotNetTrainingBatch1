@@ -65,7 +65,7 @@ namespace HomeBudget.BusinessLogic.Services.ExpenseService.DetailExpnseService
 
         public class detailResponseModel() : BasedResponseModel
         {
-            public object Data { get; set; }
+            public TblBudget Data { get; set; }
             public List<getAllExpenseResponseModel> ExpenseList { get; set; }
         }
 

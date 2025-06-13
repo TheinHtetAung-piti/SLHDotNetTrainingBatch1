@@ -1,1 +1,59 @@
-﻿<h1>testing</h1>
+﻿@using static HomeBudget.BusinessLogic.Services.ExpenseService.DetailExpnseService.DetailExpenseService
+@model detailResponseModel
+@{
+    int count = 0;
+}
+
+<body>
+
+    <div class="container mt-5">
+        <div class="card shadow p-4 mx-auto" style="max-width: 600px;">
+            <h4 class="text-center mb-4">Budget Summary</h4>
+
+            <ul class="list-group list-group-flush mb-3">
+                <li class="list-group-item d-flex justify-content-between">
+                    <strong>Name:</strong>
+                    <span>@Model.Data.BudgetName</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <strong>Amount:</strong>
+                    <span>@Model.Data.OriginalAmount</span>
+                </li>
+
+                <li class="list-group-item d-flex justify-content-between">
+                    <strong>Remaining:</strong>
+                    <span>@Model.Data.UpdatedAmount</span>
+                </li>
+            </ul>
+
+            <div class="text-muted text-end small">
+                Created on: <span id="createdDate">@Model.Data.CreateDate</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-center">
+        <table class="table table-responsive" style="width: 75%;">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Expense Name</th>
+                    <th>Amount</th>
+                    <th>Date Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.ExpenseList)
+                {
+                    <tr>
+                        <td>@(++count)</td>
+                        <td>@item.Name</td>
+                        <td>@item.Amount</td>
+                        <td>@item.CreatedDate</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</body>
